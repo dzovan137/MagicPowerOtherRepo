@@ -24,23 +24,19 @@ plt.style.use('../dependencies/aps2column.mplstyle')
 zero    = np.array([1.0,0.0])
 one     = np.array([0.0,1.0])
 
-T = (1.0/np.sqrt(2.0))*(zero + np.exp(1j*np.pi/4.0)*one)
-print('TEST = ',compute_magicSRE(T,1))
-
-
-Nsites = 4
-
-FT = FourierMatrix(Nsites)
-
+Nmax = 4
 xx = []
 yyHAAR = []
 yyFT   = []
 
 yylin = []
 
-for Nsites in range(2,4):
+for Nsites in range(2,Nmax):
+
     tamponHAAR = []
     tamponFT = []
+    tamponMlinFT = []
+
     FT = FourierMatrix(Nsites)
 
     for i in range(0,100):
@@ -62,12 +58,20 @@ for Nsites in range(2,4):
 
         print(Nsites, i)
 
+
+        # MLIN according to definition
+        #tamponMlinFT.append(1.0 - np.exp(-afterFT))
+        tamponMlinFT.append(Mlin(FT @ psi,Nsites))
+
+
     xx.append(Nsites)
     yyHAAR.append(np.average(tamponHAAR))
     yyFT.append(np.average(tamponFT))
 
+    yylin.append(np.average(tamponMlinFT))
 
-    print('AVERAGE =', Nsites, np.average(tamponHAAR),np.average(tamponFT))
+
+    print('AVERAGE =', Nsites, np.average(tamponHAAR),np.average(tamponFT), np.average(tamponMlinFT))
 
 
 
@@ -122,13 +126,16 @@ one     = np.array([0.0,1.0])
 xx = []
 yy = []
 
-for Nsites in range(2,4):
+for Nsites in range(2,Nmax):
 
     basis_states = generate_basis_states(Nsites)
     FT = FourierMatrix(Nsites)
 
     tampon = []
-    for state in basis_states:
+    #for state in basis_states:
+    for i in range(0,4):
+
+        state = basis_states[i]
 
         #state_vec = state[len(state)-1]
 
@@ -181,7 +188,7 @@ for i in range(2,Nsites+4):
 
 
 fig = plt.figure()
-grid = plt.GridSpec(1, 1, wspace=0.2, hspace=0.3)
+grid = plt.GridSpec(1, 2, wspace=0.2, hspace=0.3)
 
 ax = fig.add_subplot(grid[0, 0])
 ax.set_title(r"  ",fontsize=20)
@@ -200,10 +207,18 @@ ax.plot(xx_fit,yy_fit,color='green',label='y = %.2f x + %.2f' %( m_fit,c_fit))
 ax.plot(xx_fit,yy_max,color='red',label=r'max $M_2$ possible $\log_2{(2^N + 1)} - \log_2{(2)}$')
 
 
+ax.legend(ncol=1,loc='best',fontsize='20',framealpha=0.5)
 
-#ax.scatter(xx,yylin,marker='s',color='magenta',label=r'linearized magic $M_{\rm lin} = 1 - e^{-M_2}$')
+
+
+ax = fig.add_subplot(grid[0, 1])
+ax.set_title(r"  ",fontsize=20)
+
+ax.scatter(xx,yylin,marker='s',color='magenta',label=r'linearized magic $M_{\rm lin} (\Psi) = 1 - d^{-1} \sum\limits_{P} {\rm Tr} [\psi P]$')
 #ax.plot(xx_fit,yy_linbound,color='black',label=r'bounding stuff')
 
+ax.set_xlabel(r" nb of qubits N ")
+ax.set_ylabel(r" Linearized magic power $M_{\rm lin}$ ")
 
 ax.legend(ncol=1,loc='best',fontsize='20',framealpha=0.5)
 
