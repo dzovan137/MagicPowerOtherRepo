@@ -22,7 +22,8 @@ plt.style.use('../dependencies/aps2column.mplstyle')
 
 import pickle
 
-
+print(15*'--')
+print('s = 1')
 
 var2 = 1      # 1 - computational basis, 2 - Clifford, 3 - Haar
 var3 = 2      # 1 - Mlin, 2 - M2 
@@ -56,8 +57,8 @@ for var1 in range(2,10):
 
 
 
-
-
+print(30*'--')
+print('s = 2')
 var2 = 2      # 1 - computational basis, 2 - Clifford, 3 - Haar
 var3 = 2      # 1 - Mlin, 2 - M2 
 var4 = 100      # how many evaluations
@@ -88,6 +89,9 @@ for var1 in range(2,10):
     yyaC.append(yyaverage)
     yysC.append(yystd)
 
+
+print(30*'--')
+print('s = 3')
 
 var2 = 3      # 1 - computational basis, 2 - Clifford, 3 - Haar
 var3 = 2      # 1 - Mlin, 2 - M2 
