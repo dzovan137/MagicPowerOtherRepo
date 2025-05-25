@@ -52,7 +52,7 @@ def convert_to_sympy_matrix(numpy_matrix, tolerance=1e-6):
         sp.Matrix: A SymPy matrix with entries replaced by symbolic constants where applicable.
     """
 
-    constants = [0, 0.5, 1, sp.sqrt(2), 1 / sp.sqrt(2), 1 / (2 * sp.sqrt(2)), 1 / 4]
+    constants = [0, 0.5, 1, sp.sqrt(2), 1 / sp.sqrt(2), 1 / (2 * sp.sqrt(2)), 1 / 4, 1/8] 
 
     # Extend the list with negative versions of the constants
     constants.extend([-c for c in constants])
@@ -151,6 +151,50 @@ def compute_magic_symbolic_from_unitary3(matrix):
 
     return final
 
+def compute_magic_symbolic_from_unitary4(matrix):
+    # define Pauli matrices
+    lista = pauli_matrices()
+
+    summ = 0
+    # loop over all 4-tuples of Pauli indices
+    for i in range(4):
+        for j in range(4):
+            for k in range(4):
+                for l in range(4):
+                    # build the 4-fold tensor product by explicit indexing
+                    rows = lista[i].rows * lista[j].rows * lista[k].rows * lista[l].rows
+                    cols = lista[i].cols * lista[j].cols * lista[k].cols * lista[l].cols
+                    lol_array = sp.Matrix(
+                        rows, cols,
+                        lambda r, c: (
+                            lista[i][
+                                r // (lista[j].rows * lista[k].rows * lista[l].rows),
+                                c // (lista[j].cols * lista[k].cols * lista[l].cols)
+                            ]
+                            * lista[j][
+                                (r // (lista[k].rows * lista[l].rows)) % lista[j].rows,
+                                (c // (lista[k].cols * lista[l].cols)) % lista[j].cols
+                            ]
+                            * lista[k][
+                                (r // lista[l].rows) % lista[k].rows,
+                                (c // lista[l].cols) % lista[k].cols
+                            ]
+                            * lista[l][
+                                r % lista[l].rows,
+                                c % lista[l].cols
+                            ]
+                        )
+                    )
+                    # multiply by the unitary and take the trace^4
+                    lol = lol_array * matrix
+                    value = (lol.trace())**4
+                    summ += value
+
+    # normalize by 2^4 = 16, then take -log
+    final = -sp.log(sp.nsimplify((1/16) * summ), evaluate=False)
+    return final
+
+
 
 def compute_magic_symbolic_from_unitary(matrix, n):
 
@@ -158,6 +202,8 @@ def compute_magic_symbolic_from_unitary(matrix, n):
         return compute_magic_symbolic_from_unitary2(matrix)
     elif n == 3:
         return compute_magic_symbolic_from_unitary3(matrix)
+    elif n == 4:
+        return compute_magic_symbolic_from_unitary4(matrix)
     else:
         raise ValueError("n must be 2 or 3")
 
